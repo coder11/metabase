@@ -382,7 +382,7 @@
       (let [query (assoc (mt/mbql-query venues {:order-by [[:asc $id]], :limit 6})
                          :cache-ttl 100)]
         (with-open [os (java.io.ByteArrayOutputStream.)]
-          (let [{:keys [context rff]} (qp.streaming/streaming-context-and-rff :csv os)]
+          (let [{:keys [context rff]} (qp.streaming/streaming-context-and-rff :csv os {})]
             (qp/process-query query rff context))
           (mt/wait-for-result save-chan))
         (is (= true
@@ -391,7 +391,7 @@
         (let [uncached-results (with-open [ostream (java.io.PipedOutputStream.)
                                            istream (java.io.PipedInputStream. ostream)
                                            reader  (java.io.InputStreamReader. istream)]
-                                 (let [{:keys [context rff]} (qp.streaming/streaming-context-and-rff :csv ostream)]
+                                 (let [{:keys [context rff]} (qp.streaming/streaming-context-and-rff :csv ostream {})]
                                    (qp/process-query (dissoc query :cache-ttl) rff context))
                                  (vec (csv/read-csv reader)))]
           (with-redefs [sql-jdbc.execute/execute-reducible-query (fn [& _]
@@ -399,7 +399,7 @@
             (with-open [ostream (java.io.PipedOutputStream.)
                         istream (java.io.PipedInputStream. ostream)
                         reader  (java.io.InputStreamReader. istream)]
-              (let [{:keys [context rff]} (qp.streaming/streaming-context-and-rff :csv ostream)]
+              (let [{:keys [context rff]} (qp.streaming/streaming-context-and-rff :csv ostream {})]
                 (qp/process-query query rff context))
               (is (= uncached-results
                      (vec (csv/read-csv reader)))
@@ -415,7 +415,7 @@
       (with-mock-cache [save-chan]
         (let [query (assoc query :cache-ttl 100)]
           (with-open [os (java.io.ByteArrayOutputStream.)]
-            (let [{:keys [rff context]} (qp.streaming/streaming-context-and-rff :csv os)]
+            (let [{:keys [rff context]} (qp.streaming/streaming-context-and-rff :csv os {})]
               (is (= false
                      (boolean (:cached (qp/process-query query rff context))))
                   "Query shouldn't be cached after first run with the mock cache in place"))

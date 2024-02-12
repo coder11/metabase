@@ -55,7 +55,7 @@
   [export-format query & args]
   (with-open [bos (ByteArrayOutputStream.)
               os  (BufferedOutputStream. bos)]
-    (let [{:keys [context rff]} (qp.streaming/streaming-context-and-rff export-format os)]
+    (let [{:keys [context rff]} (qp.streaming/streaming-context-and-rff export-format os {})]
       (is (= :completed
              (:status (qp/process-query query rff (assoc context :timeout 15000))))))
     (.flush os)

@@ -140,16 +140,16 @@
   the normal `streaming-response` macro, which is geared toward Ring responses.
 
     (with-open [os ...]
-      (let [{:keys [rff context]} (qp.streaming/streaming-context-and-rff :csv os canceled-chan)]
+      (let [{:keys [rff context]} (qp.streaming/streaming-context-and-rff :csv os {} canceled-chan)]
         (qp/process-query query rff context)))"
-  ([export-format os]
-   (let [results-writer (qp.si/streaming-results-writer export-format os)]
+  ([export-format os opts]
+   (let [results-writer (qp.si/streaming-results-writer export-format os opts)]
      {:context (merge (context.default/default-context)
                       {:reducedf (streaming-reducedf results-writer os)})
       :rff     (streaming-rff results-writer)}))
 
-  ([export-format os canceled-chan]
-   (assoc-in (streaming-context-and-rff export-format os) [:context :canceled-chan] canceled-chan)))
+  ([export-format os opts canceled-chan]
+   (assoc-in (streaming-context-and-rff export-format os opts) [:context :canceled-chan] canceled-chan)))
 
 (defn- await-async-result [out-chan canceled-chan]
   ;; if we get a cancel message, close `out-chan` so the query will be canceled
@@ -163,7 +163,7 @@
   "Impl for `streaming-response`."
   ^StreamingResponse [export-format filename-prefix f]
   (streaming-response/streaming-response (qp.si/stream-options export-format filename-prefix) [os canceled-chan]
-    (let [{:keys [rff context]} (streaming-context-and-rff export-format os canceled-chan)
+    (let [{:keys [rff context]} (streaming-context-and-rff export-format os {} canceled-chan)
           result                (try
                                   (f {:rff rff, :context context})
                                   (catch Throwable e

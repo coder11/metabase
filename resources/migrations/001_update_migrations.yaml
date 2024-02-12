@@ -5529,6 +5529,27 @@ databaseChangeLog:
             sql: INSERT INTO setting ("KEY", "VALUE") VALUES ('enable-public-sharing', 'false');
       rollback: # not needed
 
+  - changeSet:
+      id: v49.2024-02-12T20:46:48
+      author: coder11
+      comment: Add csv_delimiter and csv_quote to pulse_card table
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: csv_delimiter
+                  type: char
+                  remarks: Symbol to separate values in the CSV record
+                  constraints:
+                    nullable: true
+              - column:
+                  name: csv_quote
+                  type: char
+                  remarks: Symbol which surrounds CSV fields with reserved characters
+                  constraints:
+                    nullable: true
+            tableName: pulse_card
+
 
   # >>>>>>>>>> DO NOT ADD NEW MIGRATIONS BELOW THIS LINE! ADD THEM ABOVE <<<<<<<<<<
 
